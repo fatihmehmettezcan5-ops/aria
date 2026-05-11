@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+.next/
+.npm/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+
+# Training artifacts (regenerable via `make smoke-train`)
+data/raw/wikipedia/
+data/raw/gutenberg/
+data/processed/
+runs/**/tb/
+runs/**/step_*.pt
+runs/**/pretrain/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs / dumps
+*.log
+backups/
+
+# Pip cache (sandbox artifact)
+.cache/

@@ -1,0 +1,8 @@
+# Real BPE training config. Point `corpus` at any directory tree of .txt files.
+corpus:
+  - data/raw/wikipedia
+  - data/raw/gutenberg
+vocab_size: 32000
+min_pair_freq: 2
+output_dir: runs/tokenizer
+filename: tokenizer.json

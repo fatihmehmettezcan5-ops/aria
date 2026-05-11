@@ -1,0 +1,6 @@
+# Tiny BPE for the smoke pipeline (~3 minutes on CPU).
+corpus: ["data/raw/smoke/corpus.txt"]
+vocab_size: 1024
+min_pair_freq: 2
+output_dir: runs/smoke
+filename: tokenizer.json

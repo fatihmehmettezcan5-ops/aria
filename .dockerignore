@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+.venv
+.git
+.env*
+.pytest_cache
+.ruff_cache
+node_modules
+.next
+data/raw/wikipedia
+data/raw/gutenberg
+data/processed
+# Keep runs/smoke for the bundled checkpoint, but exclude TB events.
+runs/smoke/pretrain
+runs/smoke/tb
+runs/**/tb
+runs/**/step_*.pt

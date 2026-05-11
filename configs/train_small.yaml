@@ -1,0 +1,29 @@
+# Small model on a single consumer GPU (RTX 3080/4080, 12GB VRAM).
+tokenizer: runs/tokenizer/tokenizer.json
+
+data:
+  corpus:
+    - data/raw/wikipedia
+    - data/raw/gutenberg
+  bin: data/processed/pretrain_small.bin
+
+model:
+  preset: small        # 12 layers, d=512, 8 heads, GQA(4 kv), ctx=1024
+
+train:
+  out_dir: runs/pretrain
+  total_steps: 50000
+  batch_size: 8
+  grad_accum: 8         # effective batch = 64 sequences
+  seq_len: 1024
+  lr: 0.0003
+  min_lr: 0.00003
+  warmup_steps: 1000
+  weight_decay: 0.1
+  grad_clip: 1.0
+  log_every: 50
+  eval_every: 1000
+  save_every: 2000
+  amp_dtype: bf16
+  grad_checkpointing: false
+  device: auto

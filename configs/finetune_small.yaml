@@ -1,0 +1,21 @@
+tokenizer: runs/tokenizer/tokenizer.json
+pretrain_ckpt: runs/pretrain/best.pt
+
+data:
+  jsonl: data/processed/sft.jsonl
+
+train:
+  out_dir: runs/finetune
+  total_steps: 3000
+  batch_size: 8
+  grad_accum: 4
+  seq_len: 1024
+  lr: 0.00005
+  min_lr: 0.000005
+  warmup_steps: 100
+  weight_decay: 0.0
+  log_every: 25
+  eval_every: 200
+  save_every: 500
+  amp_dtype: bf16
+  device: auto

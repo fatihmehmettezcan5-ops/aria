@@ -1,0 +1,21 @@
+tokenizer: runs/smoke/tokenizer.json
+pretrain_ckpt: runs/smoke/pretrain/final.pt
+
+data:
+  jsonl: data/processed/smoke_sft.jsonl
+
+train:
+  out_dir: runs/smoke
+  total_steps: 200
+  batch_size: 8
+  grad_accum: 1
+  seq_len: 256
+  lr: 0.0001
+  min_lr: 0.00001
+  warmup_steps: 20
+  weight_decay: 0.0
+  log_every: 25
+  eval_every: 100
+  save_every: 200
+  amp_dtype: fp32
+  device: auto

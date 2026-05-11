@@ -1,0 +1,25 @@
+tokenizer: runs/smoke/tokenizer.json
+
+data:
+  corpus: ["data/raw/smoke/corpus.txt"]
+  bin: data/processed/smoke.bin
+
+model:
+  preset: smoke         # 2 layers, d=128, 4 heads, ctx=256
+
+train:
+  out_dir: runs/smoke/pretrain
+  total_steps: 400
+  batch_size: 16
+  grad_accum: 1
+  seq_len: 128
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 50
+  weight_decay: 0.1
+  grad_clip: 1.0
+  log_every: 25
+  eval_every: 200
+  save_every: 200
+  amp_dtype: fp32       # CPU-friendly
+  device: auto
