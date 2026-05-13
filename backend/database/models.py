@@ -1,29 +1,52 @@
-"""ORM models for sessions, messages, documents, chunks, memories, api keys."""
+"""ORM models. SQLite-friendly: embeddings stored as JSON array."""
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import datetime
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     JSON, BigInteger, Boolean, DateTime, ForeignKey, Integer, String, Text, func,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database.connection import Base
 
-# Embedding dim for pgvector columns. Must match your encoder.
+
+def _decide_pgvector() -> bool:
+    flag = os.getenv("ARIA_USE_PGVECTOR", "auto").lower()
+    if flag in ("true", "1", "yes"):
+        return True
+    if flag in ("false", "0", "no"):
+        return False
+    # auto: enable only if Postgres URL AND pgvector module available
+    if not os.getenv("DATABASE_URL", "").startswith("postgresql"):
+        return False
+    try:
+        import pgvector.sqlalchemy  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+USE_PGVECTOR = _decide_pgvector()
 EMB_DIM = 768
 
+if USE_PGVECTOR:
+    from pgvector.sqlalchemy import Vector
+    EMB_COL_TYPE = Vector(EMB_DIM)
+else:
+    EMB_COL_TYPE = JSON   # list[float] stored as JSON
 
-def _uuid() -> uuid.UUID:
-    return uuid.uuid4()
+
+def _uuid() -> str:
+    # String UUIDs work with both Postgres (TEXT) and SQLite.
+    return str(uuid.uuid4())
 
 
 class Session(Base):
     __tablename__ = "sessions"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     title: Mapped[str] = mapped_column(String(255), default="New chat")
     language: Mapped[str] = mapped_column(String(8), default="en")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -37,8 +60,8 @@ class Session(Base):
 
 class Message(Base):
     __tablename__ = "messages"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
-    session_id: Mapped[uuid.UUID] = mapped_column(
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    session_id: Mapped[str] = mapped_column(
         ForeignKey("sessions.id", ondelete="CASCADE"), index=True)
     role: Mapped[str] = mapped_column(String(50))
     content: Mapped[str] = mapped_column(Text, default="")
@@ -50,7 +73,7 @@ class Message(Base):
 
 class Document(Base):
     __tablename__ = "documents"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     filename: Mapped[str] = mapped_column(String(255))
     file_type: Mapped[str] = mapped_column(String(120), default="")
     file_size: Mapped[int] = mapped_column(BigInteger, default=0)
@@ -64,12 +87,12 @@ class Document(Base):
 
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
-    document_id: Mapped[uuid.UUID] = mapped_column(
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    document_id: Mapped[str] = mapped_column(
         ForeignKey("documents.id", ondelete="CASCADE"), index=True)
     chunk_index: Mapped[int] = mapped_column(Integer)
     content: Mapped[str] = mapped_column(Text)
-    embedding: Mapped[list[float]] = mapped_column(Vector(EMB_DIM))
+    embedding = mapped_column(EMB_COL_TYPE)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -78,7 +101,7 @@ class DocumentChunk(Base):
 
 class ApiKey(Base):
     __tablename__ = "api_keys"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     key_hash: Mapped[str] = mapped_column(String(255), unique=True)
     name: Mapped[str] = mapped_column(String(255), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -88,9 +111,9 @@ class ApiKey(Base):
 
 class Memory(Base):
     __tablename__ = "memories"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     content: Mapped[str] = mapped_column(Text)
     memory_type: Mapped[str] = mapped_column(String(50), default="fact")
-    embedding: Mapped[list[float]] = mapped_column(Vector(EMB_DIM))
+    embedding = mapped_column(EMB_COL_TYPE)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

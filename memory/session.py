@@ -15,7 +15,7 @@ def list_sessions(db: Session) -> list[ChatSession]:
 
 
 def get_session(db: Session, sid: uuid.UUID) -> ChatSession | None:
-    return db.get(ChatSession, sid)
+    return db.get(ChatSession, str(sid))
 
 
 def create_session(db: Session, title: str = "New chat", metadata: dict[str, Any] | None = None) -> ChatSession:
@@ -36,7 +36,7 @@ def append_message(db: Session, sid: uuid.UUID, role: str, content: str,
 
 
 def delete_session(db: Session, sid: uuid.UUID) -> bool:
-    s = db.get(ChatSession, sid)
+    s = db.get(ChatSession, str(sid))
     if not s:
         return False
     db.delete(s)

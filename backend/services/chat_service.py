@@ -35,7 +35,7 @@ class ChatService:
         return list(db.execute(select(ChatSession).order_by(ChatSession.updated_at.desc())).scalars())
 
     def get_session(self, db: Session, sid: uuid.UUID) -> ChatSession | None:
-        return db.get(ChatSession, sid)
+        return db.get(ChatSession, str(sid))
 
     def create_session(self, db: Session, *, title: str | None, language: str) -> ChatSession:
         s = ChatSession(title=title or ("Yeni sohbet" if language == "tr" else "New chat"),
@@ -46,7 +46,7 @@ class ChatService:
         return s
 
     def delete_session(self, db: Session, sid: uuid.UUID) -> bool:
-        s = db.get(ChatSession, sid)
+        s = db.get(ChatSession, str(sid))
         if not s:
             return False
         db.delete(s)

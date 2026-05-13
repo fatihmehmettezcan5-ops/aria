@@ -1,3 +1,15 @@
+---
+title: Aria
+emoji: 🤖
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+short_description: A from-scratch AI assistant — own model, tokenizer, RAG, tools.
+---
+
 # Aria — A From-Scratch AI Assistant
 
 Aria is a complete, self-contained AI assistant where **everything is built

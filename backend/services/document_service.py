@@ -48,7 +48,7 @@ class DocumentService:
     async def get_document(self, doc_id: str) -> tuple[Document, list[DocumentChunk]] | None:
         db = session_factory()
         try:
-            d = db.get(Document, uuid.UUID(doc_id))
+            d = db.get(Document, str(doc_id))
             if not d:
                 return None
             chunks = list(d.chunks)
@@ -59,7 +59,7 @@ class DocumentService:
     async def get_full_text(self, doc_id: str) -> dict | None:
         db = session_factory()
         try:
-            d = db.get(Document, uuid.UUID(doc_id))
+            d = db.get(Document, str(doc_id))
             if not d:
                 return None
             return {"filename": d.filename, "content": d.content}
@@ -69,7 +69,7 @@ class DocumentService:
     async def delete_document(self, doc_id: str) -> bool:
         db = session_factory()
         try:
-            d = db.get(Document, uuid.UUID(doc_id))
+            d = db.get(Document, str(doc_id))
             if not d:
                 return False
             db.delete(d)

@@ -4,18 +4,26 @@ from __future__ import annotations
 import time
 from collections import defaultdict, deque
 
-import redis
 from fastapi import HTTPException, Request, status
 
 from backend.config import get_settings
 
+try:
+    import redis  # type: ignore
+    _HAVE_REDIS = True
+except ImportError:
+    redis = None  # type: ignore
+    _HAVE_REDIS = False
+
 _settings = get_settings()
 _buckets: dict[str, deque] = defaultdict(deque)
-_redis: redis.Redis | None = None
+_redis = None  # type: ignore
 
 
-def _get_redis() -> redis.Redis | None:
+def _get_redis():
     global _redis
+    if not _HAVE_REDIS:
+        return None
     if _redis is not None:
         return _redis
     try:
@@ -47,7 +55,7 @@ def check_rate_limit(request: Request) -> None:
             if count >= limit:
                 raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "rate limit exceeded")
             return
-        except redis.RedisError:
+        except Exception:  # noqa: BLE001
             pass
     bucket = _buckets[key]
     while bucket and bucket[0] < now - window:
